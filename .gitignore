@@ -4,5 +4,6 @@
 *.tfplan
 crash.log
 .terraform.lock.hcl
+../.terraform
 
 README
