@@ -219,3 +219,216 @@ Updates the state file to reflect that the infrastructure no longer exists.
 - life_cycle {
   ignore_changes = [tags, ....]
   }
+
+### Terraform Variables
+
+## Tearraform input Variables
+
+# terraform input variables basics
+
+- Create a variable block as
+- variable "name"{
+  type = string (or) number ...
+  default = "some_default_value
+  }
+
+# terraform cli prompt fot i/p
+
+- simply don't provide the default vaule. So it will ask for the value.
+
+# Override the input from cli
+
+- simply while performing plan enter -var = "ec2_instance_type = t2.small"
+
+- To crate plan file we use terraform plan -out filename.out
+
+# Envinormental variables
+
+- can set in cli
+- use Export TF_VAR_Variable_Name=<value>
+
+# tfvar file to input
+
+- Store the input variables in this file
+- use "ec2_instance_type = "t3.xlarge""
+- if the file name is not terraform.tfvar then use terraform plan -var-file=<file-name>.tfvars
+
+# We can use Maps and list as type like string, number ....
+
+# Protect sensitive input variables.
+
+- Use sensitive = true so the info will be sensitive.
+
+# Variable Definition Precedence
+
+- environment variables
+- terraform.tfvars
+- terraform.tfvars.json
+- _.auto.tfvars and _.auto.tfvars.json
+- -var and -var-file
+
+## Output Values
+
+- To get the output on the console we create a output block. Ref: Terraform-variables/Output folder
+- we can use terraform output to see the output that query the result stores in terraform.tfstate
+- we can use sensitive=true to make it sensitive info.
+
+# Passing the output to input for other module.
+
+📁 Path: modules/vpc/main.tf
+resource "aws_vpc" "main" {
+cidr_block = "10.0.0.0/16"
+}
+
+➕ Output the VPC ID
+
+📁 modules/vpc/outputs.tf
+output "vpc_id" {
+description = "The ID of the created VPC"
+value = aws_vpc.main.id
+}
+
+📁 Path: modules/subnet/variables.tf
+
+variable "vpc_id" {
+description = "VPC ID to launch subnet into"
+type = string
+}
+📁 modules/subnet/main.tf
+
+resource "aws_subnet" "main" {
+vpc_id = var.vpc_id
+cidr_block = "10.0.1.0/24"
+}
+
+📁 Root module main.tf
+module "vpc" {
+source = "./modules/vpc"
+}
+
+module "subnet" {
+source = "./modules/subnet"
+vpc_id = module.vpc.vpc_id # << Passing output from VPC module
+}
+
+## Local Values
+
+- Local values assigns a name to an expression. so that you can use that name multiple times within a module without repeating the exp.
+
+### DATA SOURCES
+
+- Data sources allow Terraform to fetch information about existing resources — either within your current AWS account or from external systems — and use that data to configure other resources.
+
+- 🤔 Why Use Data Sources?
+
+| Scenario                                | Why Use Data Source?                   |
+| --------------------------------------- | -------------------------------------- |
+| Referencing existing AWS resources      | To avoid duplication                   |
+| Getting dynamic values (like AMI IDs)   | To make code reusable                  |
+| Working in shared infrastructure setups | To use pre-created VPCs, subnets, etc. |
+
+- We use filters to get filter and get the accurate data
+
+### Terraform State and State Locking
+
+Great question! Understanding **Terraform State Backends** and **State Locking** is **critical for working in teams and managing infrastructure safely**.
+
+Let’s break it down clearly and simply.
+
+---
+
+## 🗂️ What Is Terraform State?
+
+- Terraform maintains a **state file** (`terraform.tfstate`) to **track the real infrastructure** and **what Terraform created**.
+
+---
+
+## 📦 What Is a Terraform State Backend?
+
+A **backend** in Terraform defines **where** the Terraform state file is stored.
+
+### ✅ Common Backends:
+
+| Backend          | Description                                       |
+| ---------------- | ------------------------------------------------- |
+| `local`          | Default — stores `terraform.tfstate` locally      |
+| `s3`             | Stores state remotely in AWS S3 (great for teams) |
+| `remote`         | Stores state in Terraform Cloud                   |
+| `azurerm`, `gcs` | Backends for Azure/GCP                            |
+
+---
+
+## 🧠 Why Use a Remote Backend?
+
+If you're working **alone**, local state is fine.
+But if you're working in a **team**, local state causes issues like:
+
+- Conflicts from multiple users applying at once
+- No centralized state
+- No audit/logging
+
+That’s why you use **remote backends** like **S3 with DynamoDB locking**.
+
+---
+
+## 🔐 What Is State Locking?
+
+State locking **prevents concurrent operations** from corrupting the state file.
+
+### 🧱 How Locking Works:
+
+- When a user runs `terraform apply`, the state is **locked**.
+- While it's locked, others **cannot apply or modify** state.
+- Once the operation completes, the lock is **released**.
+
+---
+
+## 🛠 Example: Using S3 Backend with Locking
+
+```hcl
+terraform {
+  backend "s3" {
+    bucket         = "my-terraform-state-bucket"
+    key            = "prod/terraform.tfstate"
+    region         = "us-east-1"
+    dynamodb_table = "terraform-lock-table"  # for state locking
+  }
+}
+```
+
+### 💡 `dynamodb_table` enables state locking.
+
+You must create the table manually:
+
+```bash
+aws dynamodb create-table \
+  --table-name terraform-lock-table \
+  --attribute-definitions AttributeName=LockID,AttributeType=S \
+  --key-schema AttributeName=LockID,KeyType=HASH \
+  --billing-mode PAY_PER_REQUEST
+```
+
+---
+
+## 🛡️ Why State Locking Matters
+
+| Without Locking                   | With Locking                         |
+| --------------------------------- | ------------------------------------ |
+| Risk of state corruption          | Safe, exclusive access               |
+| Two people can apply at same time | One person gets lock, others wait    |
+| No history of who changed what    | Easier to control in CI/CD pipelines |
+
+---
+
+## ✅ Summary
+
+| Concept               | Explanation                                                 |
+| --------------------- | ----------------------------------------------------------- |
+| **State Backend**     | Where Terraform stores `.tfstate` (local, S3, remote)       |
+| **Remote Backend**    | S3, Terraform Cloud, etc. — centralizes state               |
+| **State Locking**     | Prevents concurrent `apply` or `plan` from corrupting state |
+| **Locking Mechanism** | Typically done with DynamoDB when using S3 backend          |
+
+---
+
+Let me know if you’d like a working example of setting up a backend with S3 + DynamoDB locking!
