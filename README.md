@@ -431,4 +431,35 @@ aws dynamodb create-table \
 
 ---
 
-Let me know if you’d like a working example of setting up a backend with S3 + DynamoDB locking!
+- In terraform backend we have to consider only where the state is stored and where the operations are performed.
+
+- State Storage : Terraform uses persistant state data to keep track on resources it manages.
+- State Lock : It is to avoid the conflicts while a group of people managing same storage.
+- Operations : The CRUD API's that performed on Infra.
+
+## Terraform State Commands
+
+- Terraform show - Gives the state file as output
+- Terraform refresh - when ever there are some manual changes happened to our infra so that changes will get updated in our state file.
+- terraform state list - will list all the resources in the terraform state
+- terraform state show - will show all the attributes of the terraform resource
+- terraform state mv <oldName> <newName> to rename
+- Terraform rm - To remove unwanted resources. By using this we can remove resource from state so terraform wont manage the resource. we can handle it by our own.
+- Terraform replace-provider - we can chnage the provider using this.
+- Terraform state pull and terraform state push - we can push and pull the state files into and from backend
+- terraform force-unlock <LockID>
+- terraform taint and untaint
+- Terraform will mark that resource as "tainted", meaning it is considered damaged or needs to be recreated — even if nothing in the code has changed.
+- to untaint terraform untaint aws_instance.web
+- 🎯 What is Terraform Targeting?
+  Terraform Targeting allows you to apply changes to specific resources only instead of applying changes to your entire infrastructure.
+
+This is done using the -target flag with the terraform apply or terraform plan command.
+
+### Terraform workspace
+
+- A common usecase of multiple workspace is create a parllel, distinct copy of infra, in order to test the changes that will be happen with out changing the main flow of infra.
+
+- Ex. a developer working on a complex infra might create a temporary work space inorder to freely experiment the chnanges without affectig the main work flow.
+
+- Some Cmds : terraform workspace show, terraform workspace list, terraform workspace new, terraform workspace select, terraform workspace delete
