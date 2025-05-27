@@ -540,3 +540,7 @@ Run commands before destroying resources (cleanup).
 
 - If there is some failure or fault in provisioners the whole apply will get failed
 - If we want to use terraform apply even there is fault in provisioners the we use --> `on_failure = true`
+
+### Terraform Modules
+
+- Modules are containers for multiple resources that are used together. A module contains set of .tf files kept together in a directory.
