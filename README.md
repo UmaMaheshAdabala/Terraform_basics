@@ -275,6 +275,7 @@ Updates the state file to reflect that the infrastructure no longer exists.
 
 # Passing the output to input for other module.
 
+```t
 📁 Path: modules/vpc/main.tf
 resource "aws_vpc" "main" {
 cidr_block = "10.0.0.0/16"
@@ -310,6 +311,7 @@ module "subnet" {
 source = "./modules/subnet"
 vpc_id = module.vpc.vpc_id # << Passing output from VPC module
 }
+```
 
 ## Local Values
 
@@ -327,7 +329,7 @@ vpc_id = module.vpc.vpc_id # << Passing output from VPC module
 | Getting dynamic values (like AMI IDs)   | To make code reusable                  |
 | Working in shared infrastructure setups | To use pre-created VPCs, subnets, etc. |
 
-- We use filters to get filter and get the accurate data
+- We use filters to get the accurate data
 
 ### Terraform State and State Locking
 
@@ -349,12 +351,14 @@ A **backend** in Terraform defines **where** the Terraform state file is stored.
 
 ### ✅ Common Backends:
 
+```t
 | Backend          | Description                                       |
 | ---------------- | ------------------------------------------------- |
 | `local`          | Default — stores `terraform.tfstate` locally      |
 | `s3`             | Stores state remotely in AWS S3 (great for teams) |
 | `remote`         | Stores state in Terraform Cloud                   |
 | `azurerm`, `gcs` | Backends for Azure/GCP                            |
+```
 
 ---
 
@@ -463,3 +467,76 @@ This is done using the -target flag with the terraform apply or terraform plan c
 - Ex. a developer working on a complex infra might create a temporary work space inorder to freely experiment the chnanges without affectig the main work flow.
 
 - Some Cmds : terraform workspace show, terraform workspace list, terraform workspace new, terraform workspace select, terraform workspace delete
+
+```
+
+```
+
+### Terraform Provisioners
+
+- Provisioners in Terraform are used to execute scripts or commands on a local machine or remote resource after it's created or before it's destroyed.
+
+- They are typically used for bootstrapping, initial setup, or cleanup tasks.
+
+- Provisioners are used to:
+
+Install software on a newly created EC2 instance.
+
+Run configuration scripts.
+
+Push files (e.g., configs) to remote machines.
+
+Run commands before destroying resources (cleanup).
+
+```t
+- Example:
+  resource "aws_instance" "web" {
+  ami = "ami-0c55b159cbfafe1f0"
+  instance_type = "t2.micro"
+
+  provisioner "remote-exec" {
+  inline = [
+  "sudo apt update",
+  "sudo apt install -y nginx"
+  ]
+  }
+
+  connection {
+  type = "ssh"
+  user = "ubuntu"
+  private_key = file("~/.ssh/id_rsa")
+  host = self.public_ip
+  }
+  }
+```
+
+## File Provisioner
+
+- It is used to copy files or directeries from terraform executing machine to newly created resources.
+
+## Local Exec Provisoner
+
+- Executes a command on the machine where Terraform is being run (i.e., your local laptop or CI/CD runner).
+
+## Remote Exec Provisioner
+
+- Executes commands on the remote resource after it's provisioned (e.g., an EC2 instance).
+
+- Uses SSH or WinRM to connect.
+
+### Null Resource & Provisioner
+
+- A null_resource is a special Terraform resource that does nothing on its own, but can be used with provisioners to run scripts or commands.
+  🔸 Why use it?
+  To run local or remote scripts independently of cloud resources.
+
+- To trigger actions based on changes to input variables or files.
+
+- To act as a placeholder for automation steps.
+
+# Note:
+
+- Even there is some change in provisioner the done and you ran terraform apply, it wont get changed because terraform wont track provisioners.
+
+- If there is some failure or fault in provisioners the whole apply will get failed
+- If we want to use terraform apply even there is fault in provisioners the we use --> `on_failure = true`
