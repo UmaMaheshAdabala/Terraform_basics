@@ -240,6 +240,10 @@ Updates the state file to reflect that the infrastructure no longer exists.
 
 - simply while performing plan enter -var = "ec2_instance_type = t2.small"
 
+```t
+terraform plan -var="ec2_instance_type=t3.large" -var="ec2_instance_count=1"
+```
+
 - To crate plan file we use terraform plan -out filename.out
 
 # Envinormental variables
@@ -247,11 +251,20 @@ Updates the state file to reflect that the infrastructure no longer exists.
 - can set in cli
 - use Export TF_VAR_Variable_Name=<value>
 
+```t
+export TF_VAR_ec2_instance_count=1
+export TF_VAR_ec2_instance_type=t3.large
+```
+
 # tfvar file to input
 
 - Store the input variables in this file
 - use "ec2_instance_type = "t3.xlarge""
-- if the file name is not terraform.tfvar then use terraform plan -var-file=<file-name>.tfvars
+- if the file name is not terraform.tfvar then use
+
+```t
+ terraform plan -var-file=<file-name>.tfvars
+```
 
 # We can use Maps and list as type like string, number ....
 
@@ -544,3 +557,18 @@ Run commands before destroying resources (cleanup).
 ### Terraform Modules
 
 - Modules are containers for multiple resources that are used together. A module contains set of .tf files kept together in a directory.
+
+### Terraform Cloud & Enterprise
+
+- Terraform cloud and enterprise are different distributions for same applications.
+- It manages terraform runs in a consistent and reliable environment, and easy access to shared and secret data, access control for approving changes to infra, a private registry for sharing Terraform modules, detailed policy controls for governing the contents of terraform configurations.
+
+## Terraform VCS Integration
+
+- Terraform cloud can automatically initiate Terraform runs.
+- Terraform cloud makes code review easier by automatically predicting how pull requests will affect infrastructure.
+
+### Terraform Sentinal
+
+- Terraform sentinal is a policy management service. So that we can define some set of policy, so on successful completion of terraform plan if the code obeys all the policies then only terrform will apply the changes.
+  we can write the policies in xyz.sentinal file and configure those policies in sentinal.hcl file.

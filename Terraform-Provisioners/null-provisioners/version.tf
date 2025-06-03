@@ -14,12 +14,4 @@ terraform {
       version = "~> 0.13.0"
     }
   }
-  backend "s3" {
-    bucket = "s3-backend-terraform-state-cmds"
-    key    = "prac/terraform.tfstate"
-    region = "ap-south-1"
-
-    #Backend_Lock
-    dynamodb_table = "terraform-state-cmds"
-  }
 }
