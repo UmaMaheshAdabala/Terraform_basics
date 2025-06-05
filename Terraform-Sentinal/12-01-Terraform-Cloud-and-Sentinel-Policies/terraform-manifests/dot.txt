@@ -1,0 +1,20 @@
+digraph G {
+  rankdir = "RL";
+  node [shape = rect, fontname = "sans-serif"];
+  "aws_s3_bucket.mywebsite" [label="aws_s3_bucket.mywebsite"];
+  "aws_s3_bucket_acl.mywebsite" [label="aws_s3_bucket_acl.mywebsite"];
+  "aws_s3_bucket_ownership_controls.mywebsite" [label="aws_s3_bucket_ownership_controls.mywebsite"];
+  "aws_s3_bucket_policy.mywebsite" [label="aws_s3_bucket_policy.mywebsite"];
+  "aws_s3_bucket_public_access_block.mywebsite" [label="aws_s3_bucket_public_access_block.mywebsite"];
+  "aws_s3_bucket_versioning.mywebsite" [label="aws_s3_bucket_versioning.mywebsite"];
+  "aws_s3_bucket_website_configuration.mywebsite" [label="aws_s3_bucket_website_configuration.mywebsite"];
+  "aws_s3_object.bucket" [label="aws_s3_object.bucket"];
+  "aws_s3_bucket_acl.mywebsite" -> "aws_s3_bucket_ownership_controls.mywebsite";
+  "aws_s3_bucket_acl.mywebsite" -> "aws_s3_bucket_public_access_block.mywebsite";
+  "aws_s3_bucket_ownership_controls.mywebsite" -> "aws_s3_bucket.mywebsite";
+  "aws_s3_bucket_policy.mywebsite" -> "aws_s3_bucket.mywebsite";
+  "aws_s3_bucket_public_access_block.mywebsite" -> "aws_s3_bucket.mywebsite";
+  "aws_s3_bucket_versioning.mywebsite" -> "aws_s3_bucket.mywebsite";
+  "aws_s3_bucket_website_configuration.mywebsite" -> "aws_s3_bucket.mywebsite";
+  "aws_s3_object.bucket" -> "aws_s3_bucket.mywebsite";
+}
