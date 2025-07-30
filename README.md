@@ -572,3 +572,35 @@ Run commands before destroying resources (cleanup).
 
 - Terraform sentinal is a policy management service. So that we can define some set of policy, so on successful completion of terraform plan if the code obeys all the policies then only terrform will apply the changes.
   we can write the policies in xyz.sentinal file and configure those policies in sentinal.hcl file.
+
+# DEPLOY Docker
+
+- `https://medium.com/@21harsh12/deploy-a-docker-container-with-aws-ecs-and-terraform-ee0a27f1f5a6`
+
+- Launch an EC2 instance
+- Install docker
+- copy code into instance from git or local.
+- write docker file
+- run the docker file
+- create the ECR in aws from terraform
+
+```t
+resource "aws_ecr_repository" "elastic_repo" {
+  name = "my-ecr-repo"
+}
+```
+
+and goto aws and the view push commands and execute them in terminal and image is pushed to repo.
+
+🚀 High-level steps
+✅ Build and push Docker image to ECR (Elastic Container Registry)
+✅ Write Terraform code to create:
+
+VPC + Subnets + Security Group
+
+ECS Cluster
+
+Task Definition
+
+Service
+✅ ECS will pull the image from ECR and run it
