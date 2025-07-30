@@ -4,6 +4,10 @@
 
 =======
 
+# LINK -
+
+`https://github.com/stacksimplify/hashicorp-certified-terraform-associate`
+
 ### Terraform
 
 ## IAC
